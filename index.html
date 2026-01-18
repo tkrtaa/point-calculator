@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>2次逆転・リアリティ診断</title>
+    <style>
+        body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f0f2f5; }
+        .card { background: white; padding: 30px; border-radius: 12px; border: 2px solid #222; max-width: 450px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h3 { margin-top: 0; color: #1a1a1a; border-bottom: 3px solid #333; padding-bottom: 10px; font-size: 1.25rem; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #444; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; transition: border-color 0.2s; }
+        input:focus { border-color: #333; outline: none; background-color: #fffdfa; }
+        .highlight-input { border: 2px solid #d9534f; background-color: #fff5f5; }
+        button { width: 100%; padding: 15px; background-color: #222; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; transition: background 0.2s; }
+        button:hover { background-color: #444; }
+        #resultArea { margin-top: 25px; display: none; border-top: 1px dashed #ccc; padding-top: 20px; }
+        .result-label { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .result-value { font-size: 32px; font-weight: bold; color: #222; margin-bottom: 15px; }
+        .advice-box { padding: 15px; border-radius: 6px; font-size: 14px; line-height: 1.6; border-left: 6px solid; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h3>2次逆転・リアリティ診断</h3>
+    
+    <div class="input-group">
+        <label>① 合格者平均点（昨年度）</label>
+        <input type="number" id="avgScore" placeholder="例: 750">
+    </div>
+
+    <div class="input-group">
+        <label>② 自分の共テ持ち点（圧縮後）</label>
+        <input type="number" id="myScore" placeholder="例: 680">
+    </div>
+
+    <div class="input-group">
+        <label>③ 2次試験の満点</label>
+        <input type="number" id="secondaryMax" placeholder="例: 400">
+    </div>
+
+    <div class="input-group">
+        <label style="color: #d9534f;">④ 過去問演習での平均得点率（％）</label>
+        <input type="number" id="pastAvgRate" class="highlight-input" placeholder="例: 60">
+    </div>
+
+    <button onclick="runDiagnostic()">戦略的妥当性を診断する</button>
+
+    <div id="resultArea">
+        <div class="result-label">合格に必要な2次得点率:</div>
+        <div id="requiredValue" class="result-value"></div>
+        
+        <div id="gapAlert" class="advice-box"></div>
+    </div>
+</div>
+
+<script>
+function runDiagnostic() {
+    const avg = parseFloat(document.getElementById('avgScore').value);
+    const mine = parseFloat(document.getElementById('myScore').value);
+    const max = parseFloat(document.getElementById('secondaryMax').value);
+    const pastRate = parseFloat(document.getElementById('pastAvgRate').value);
+    
+    const resultArea = document.getElementById('resultArea');
+    const reqDisplay = document.getElementById('requiredValue');
+    const gapAlert = document.getElementById('gapAlert');
+
+    if ([avg, mine, max, pastRate].some(isNaN) || max <= 0) {
+        alert('すべての項目を正しく入力してください。');
+        return;
+    }
+
+    const requiredRate = ((avg - mine) / max) * 100;
+    const gap = requiredRate - pastRate;
+    
+    resultArea.style.display = 'block';
+    reqDisplay.innerText = requiredRate.toFixed(1) + '%';
+
+    // 宅浪太の判定ロジック
+    if (gap >= 5) {
+        gapAlert.style.backgroundColor = '#f8d7da';
+        gapAlert.style.color = '#721c24';
+        gapAlert.style.borderColor = '#d9534f';
+        gapAlert.innerHTML = `<strong>【判定：奇跡への依存】</strong><br>必要得点率が実力（${pastRate}%）を5%以上上回っている。これはもはや戦略ではない、神頼みだ。特に浪人生は、この「5%の壁」を突破するのにどれほどの奇跡が必要か、冷静に考えろ。`;
+    } else if (gap > 0) {
+        gapAlert.style.backgroundColor = '#fff3cd';
+        gapAlert.style.color = '#856404';
+        gapAlert.style.borderColor = '#ffc107';
+        gapAlert.innerHTML = `<strong>【判定：背伸びの攻防】</strong><br>実力をわずかに超える得点が求められる。本番の爆発力に期待するしかないが、残り期間でそのギャップを埋めるための『絶対的な武器』を用意できるか？`;
+    } else {
+        gapAlert.style.backgroundColor = '#d4edda';
+        gapAlert.style.color = '#155724';
+        gapAlert.style.borderColor = '#28a745';
+        gapAlert.innerHTML = `<strong>【判定：妥当な出願】</strong><br>演習通りの実力が出せれば、数字上は合格圏内だ。新しいことはせず、ミスをゼロにするための守りの練習を徹底しろ。`;
+    }
+}
+</script>
+
+</body>
+</html>
